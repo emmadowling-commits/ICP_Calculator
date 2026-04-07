@@ -71,8 +71,3 @@ with tab1:
     metric_col1.metric(label="Addressable Spend", value=f"${addressable_spend:,.0f}M")
     metric_col2.metric(label="Projected Savings", value=f"${projected_savings:,.1f}M")
     metric_col3.metric(label="Projected ROI", value=f"{roi_multiplier:,.0f}x")
-
-    # Dynamic Insights focused on ROI
-    st.write("")
-    if roi_multiplier >= 80:
-        st.
