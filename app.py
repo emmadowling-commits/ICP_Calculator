@@ -71,3 +71,37 @@ with tab1:
     metric_col1.metric(label="Addressable Spend", value=f"${addressable_spend:,.0f}M")
     metric_col2.metric(label="Projected Savings", value=f"${projected_savings:,.1f}M")
     metric_col3.metric(label="Projected ROI", value=f"{roi_multiplier:,.0f}x")
+
+    # Dynamic Insights (Fixed to use projected_savings)
+    st.write("")
+    if projected_savings >= 40:
+        st.success(f"**🔥 EXACT ICP MATCH (Tier 1):** Moving from {maturity} to Autonomous Sourcing will yield game-changing EBITDA expansion. Recommend pitching an immediate 8-12 week Pilot.")
+    elif projected_savings >= 15:
+        st.warning(f"**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value. Addressing their {maturity} processes with an AS pilot will yield a highly defensible return on investment.")
+    else:
+        st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently justify a full AS implementation. Pivot to strategic sourcing advisory.")
+
+# --- TAB 2: The Consultant View (The Math) ---
+with tab2:
+    st.subheader("Value Tree Breakdown")
+    st.markdown("This tab details the exact mathematical logic used to calculate the ROI based on the inputs selected above. It acts as a defensible baseline for client conversations.")
+    
+    st.write("---")
+    st.markdown("### Step 1: Calculate Addressable Spend")
+    st.write("We do not target 100% of turnover. We isolate the 'Make or Move' COGS (Cost of Goods Sold).")
+    st.code(f"Total Turnover (${turnover}B) * Industry Spend Intensity ({spend_pct*100}%) = ${addressable_spend:,.0f}M Addressable Spend")
+    
+    st.write("---")
+    st.markdown("### Step 2: Determine AI Efficiency Gain")
+    st.write("We establish a base savings % based on market volatility, then adjust it based on the whitespace left by their current tech stack.")
+    st.code(f"Base Volatility Gain ({base_gain*100}%) * Tech Maturity Multiplier ({gain_pct/base_gain:.1f}x) = {gain_pct*100:.1f}% Total Efficiency Gain")
+    
+    st.write("---")
+    st.markdown("### Step 3: Projected Savings")
+    st.write("Applying the total efficiency gain to the addressable spend to find the absolute dollar value generated.")
+    st.code(f"Addressable Spend (${addressable_spend:,.0f}M) * Total Efficiency Gain ({gain_pct*100:.1f}%) = ${projected_savings:,.1f}M Projected Savings")
+    
+    st.write("---")
+    st.markdown("### Step 4: ROI Calculation")
+    st.write("Comparing the total projected savings against the estimated investment required for a Kearney Autonomous Sourcing Pilot.")
+    st.code(f"Projected Savings (${projected_savings:,.1f}M) / Estimated Pilot Cost (${pilot_cost}M) = {roi_multiplier:,.0f}x ROI")
