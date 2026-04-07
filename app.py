@@ -16,6 +16,32 @@ st.title("Autonomous Sourcing: ICP Engine")
 st.markdown("Evaluate prospect fit and generate a defensible, ROI-driven business case for an AS Pilot.")
 st.divider()
 
+# --- TAXONOMY LIST ---
+SPEND_CATEGORIES = [
+    "Construction",
+    "Financial Services",
+    "Fleet & Vehicles",
+    "Goods",
+    "Human Resources (HR)",
+    "Information Technology (IT)",
+    "Information Technology (IT) > Cloud Services",
+    "Information Technology (IT) > Hardware",
+    "Information Technology (IT) > IT Consulting",
+    "Information Technology (IT) > IT Support & Maintenance",
+    "Logistics",
+    "Logistics > Air",
+    "Logistics > Ocean",
+    "Logistics > Ocean > Full Container Load (FCL)",
+    "Logistics > Ocean > Less than Container Load (LCL)",
+    "Logistics > Parcel",
+    "Real Estate & Facilities > Heating, Ventilation and Air Conditioning (HVAC)",
+    "Real Estate & Facilities > Janitorial Services",
+    "Real Estate & Facilities > Landscaping",
+    "Real Estate & Facilities > Leasing & Rental",
+    "Real Estate & Facilities > Security Services",
+    "Utilities"
+]
+
 # --- INPUT SECTION (Global) ---
 st.header("1. Prospect Profile")
 col1, col2, col3 = st.columns(3)
@@ -25,15 +51,20 @@ with col1:
     turnover = st.number_input("Annual Turnover ($ Billions)", min_value=0.1, value=2.5, step=0.5)
 
 with col2:
-    industry = st.selectbox("Business Model", ["Make (Manufacturing/Agri)", "Move (Logistics/Retail)", "Services/Other"])
+    # The selectbox naturally allows users to type to search/filter the list
+    industry = st.selectbox("Primary Spend Category (Click & Type to Search)", SPEND_CATEGORIES)
     volatility = st.radio("Market Volatility", ["Low (Stable)", "Medium", "High (Rapid price changes)"])
 
 with col3:
     maturity = st.selectbox("Current Sourcing Tech", ["Manual (Excel/Emails)", "Basic e-Sourcing Tools", "Advanced ERP/Digital"])
 
 # --- CORE MATH LOGIC ---
-# 1. Direct Spend % 
-spend_pct = 0.60 if "Make" in industry or "Move" in industry else 0.20
+# 1. Direct Spend % Mapping based on selected category
+high_intensity_categories = ["Construction", "Fleet & Vehicles", "Goods", "Logistics"]
+if any(cat in industry for cat in high_intensity_categories):
+    spend_pct = 0.60  # Physical supply chain implies higher direct COGS
+else:
+    spend_pct = 0.20  # Indirect spend categories
 
 # 2. Base AS Efficiency Gain 
 if "High" in volatility:
@@ -72,14 +103,14 @@ with tab1:
     metric_col2.metric(label="Projected Savings", value=f"${projected_savings:,.1f}M")
     metric_col3.metric(label="Projected ROI", value=f"{roi_multiplier:,.0f}x")
 
-    # Dynamic Insights (Fixed to use projected_savings)
+    # Dynamic Insights focused on ROI
     st.write("")
-    if projected_savings >= 40:
-        st.success(f"**🔥 EXACT ICP MATCH (Tier 1):** Moving from {maturity} to Autonomous Sourcing will yield game-changing EBITDA expansion. Recommend pitching an immediate 8-12 week Pilot.")
-    elif projected_savings >= 15:
-        st.warning(f"**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value. Addressing their {maturity} processes with an AS pilot will yield a highly defensible return on investment.")
+    if roi_multiplier >= 80:
+        st.success(f"**🔥 EXACT ICP MATCH (Tier 1):** Moving from {maturity} to Autonomous Sourcing offers a massive {roi_multiplier:,.0f}x return. The business case for an immediate 8-12 week Pilot is indisputable.")
+    elif roi_multiplier >= 30:
+        st.warning(f"**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value. Addressing their {maturity} processes with an AS pilot will yield a highly defensible {roi_multiplier:,.0f}x ROI.")
     else:
-        st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently justify a full AS implementation. Pivot to strategic sourcing advisory.")
+        st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently yield a high enough ROI to justify a full AS implementation. Pivot to strategic sourcing advisory.")
 
 # --- TAB 2: The Consultant View (The Math) ---
 with tab2:
@@ -88,8 +119,8 @@ with tab2:
     
     st.write("---")
     st.markdown("### Step 1: Calculate Addressable Spend")
-    st.write("We do not target 100% of turnover. We isolate the 'Make or Move' COGS (Cost of Goods Sold).")
-    st.code(f"Total Turnover (${turnover}B) * Industry Spend Intensity ({spend_pct*100}%) = ${addressable_spend:,.0f}M Addressable Spend")
+    st.write("We isolate the relevant addressable spend based on whether the category is direct (physical) or indirect.")
+    st.code(f"Total Turnover (${turnover}B) * Category Spend Intensity ({spend_pct*100}%) = ${addressable_spend:,.0f}M Addressable Spend")
     
     st.write("---")
     st.markdown("### Step 2: Determine AI Efficiency Gain")
