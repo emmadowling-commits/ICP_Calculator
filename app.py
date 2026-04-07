@@ -1,55 +1,107 @@
 import streamlit as st
 
 # Set up the page formatting
-st.set_page_config(page_title="AS Ideal Customer Profile", layout="centered")
+st.set_page_config(page_title="AS ICP Engine", layout="wide")
 
+# --- SIDEBAR: KEARNEY ASSUMPTIONS ---
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Kearney_logo.svg/512px-Kearney_logo.svg.png", width=150)
+st.sidebar.header("Project Assumptions")
+st.sidebar.write("Adjust internal variables here.")
+pilot_cost = st.sidebar.slider("Est. Pilot Cost ($M)", min_value=0.2, max_value=1.5, value=0.5, step=0.1)
+st.sidebar.divider()
+st.sidebar.info("This engine uses a standard value-tree to filter top-line turnover down to addressable spend.")
+
+# --- HEADER ---
 st.title("Autonomous Sourcing: ICP Engine")
-st.markdown("### Evaluate and Qualify the Ideal Customer Profile")
-st.write("Use this tool to determine if a prospect fits the Autonomous Sourcing ICP based on spend density and market volatility.")
+st.markdown("Evaluate prospect fit and generate a defensible business case for an AS Pilot.")
 st.divider()
 
-# --- INPUT SECTION ---
+# --- INPUT SECTION (Global) ---
 st.header("1. Prospect Profile")
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     name = st.text_input("Company Name", "e.g., Tirlán or Musgrave")
-    industry = st.selectbox("Business Model", ["Make (Manufacturing/Agri)", "Move (Logistics/Retail)", "Services/Other"])
+    turnover = st.number_input("Annual Turnover ($ Billions)", min_value=0.1, value=2.5, step=0.5)
 
 with col2:
-    turnover = st.number_input("Annual Turnover ($ Billions)", min_value=0.1, value=2.5, step=0.5)
-    volatility = st.radio("Market Volatility", ["Low (Stable)", "Medium", "High (Rapidly changing prices)"])
+    industry = st.selectbox("Business Model", ["Make (Manufacturing/Agri)", "Move (Logistics/Retail)", "Services/Other"])
+    volatility = st.radio("Market Volatility", ["Low (Stable)", "Medium", "High (Rapid price changes)"])
+
+with col3:
+    maturity = st.selectbox("Current Sourcing Tech", ["Manual (Excel/Emails)", "Basic e-Sourcing Tools", "Advanced ERP/Digital"])
+
+# --- CORE MATH LOGIC ---
+# 1. Direct Spend % 
+spend_pct = 0.60 if "Make" in industry or "Move" in industry else 0.20
+
+# 2. Base AS Efficiency Gain 
+if "High" in volatility:
+    base_gain = 0.05
+elif "Medium" in volatility:
+    base_gain = 0.03
+else:
+    base_gain = 0.015
+
+# 3. Maturity Multiplier 
+if "Manual" in maturity:
+    gain_pct = base_gain * 1.2
+elif "Basic" in maturity:
+    gain_pct = base_gain * 1.0
+else:
+    gain_pct = base_gain * 0.8
+
+# 4. Final Math Calculations
+addressable_spend = (turnover * 1000) * spend_pct
+ebitda_lift = addressable_spend * gain_pct 
+roi_multiplier = ebitda_lift / pilot_cost
 
 st.divider()
 
-# --- LOGIC & CALCULATION SECTION ---
-# 1. Determine Direct Spend % based on the 'Make or Move' rule
-if "Make" in industry or "Move" in industry:
-    spend_pct = 0.60  # 60% of turnover goes to direct materials/freight
-else:
-    spend_pct = 0.20  # 20% for services
+# --- TABS SECTION ---
+st.header("2. Engine Outputs")
+tab1, tab2 = st.tabs(["📊 Executive Business Case", "🧠 Logic & Calculations"])
 
-# 2. Determine the AS Efficiency Gain based on volatility
-if "High" in volatility:
-    gain_pct = 0.05  # 5% savings because AI beats humans in chaotic markets
-elif "Medium" in volatility:
-    gain_pct = 0.03  # 3% standard savings
-else:
-    gain_pct = 0.015 # 1.5% savings in highly stable/fixed markets
+# --- TAB 1: The Executive View ---
+with tab1:
+    st.subheader(f"Projected Impact for {name}")
+    
+    # Display the core metrics
+    metric_col1, metric_col2, metric_col3 = st.columns(3)
+    metric_col1.metric(label="Addressable Spend", value=f"${addressable_spend:,.0f}M")
+    metric_col2.metric(label="Est. EBITDA Lift", value=f"${ebitda_lift:,.1f}M")
+    metric_col3.metric(label="Projected ROI", value=f"{roi_multiplier:,.0f}x")
 
-# 3. Calculate EBITDA Lift (Math: Turnover in Billions * 1000 to get Millions)
-ebitda_lift = (turnover * 1000) * spend_pct * gain_pct 
+    # Dynamic Insights
+    st.write("")
+    if ebitda_lift >= 40:
+        st.success(f"**🔥 EXACT ICP MATCH (Tier 1):** Moving from {maturity} to Autonomous Sourcing will yield game-changing EBITDA expansion. Recommend pitching an immediate 8-12 week Pilot.")
+    elif ebitda_lift >= 15:
+        st.warning(f"**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value. Addressing their {maturity} processes with an AS pilot will yield a highly defensible return on investment.")
+    else:
+        st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently justify a full AS implementation. Pivot to strategic sourcing advisory.")
 
-# --- RESULTS SECTION ---
-st.header("2. ICP Qualification Result")
-
-# Display the massive dollar amount
-st.metric(label=f"Estimated Annual EBITDA Lift for {name}", value=f"${ebitda_lift:,.1f} Million")
-
-# Dynamic Kearney-style insights based on the result
-if ebitda_lift >= 40:
-    st.success("**🔥 EXACT ICP MATCH (Tier 1):** This prospect is a perfect fit. Their spend density and volatility mean Autonomous Sourcing will deliver massive, immediate ROI.")
-elif ebitda_lift >= 15:
-    st.warning("**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value potential. They may have a smaller turnover, but their 'Make/Move' complexity justifies an AS pilot.")
-else:
-    st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently justify a full-scale Autonomous Sourcing implementation.")
+# --- TAB 2: The Consultant View (The Math) ---
+with tab2:
+    st.subheader("Value Tree Breakdown")
+    st.markdown("This tab details the exact mathematical logic used to calculate the EBITDA Lift based on the inputs selected above. It acts as a defensible baseline for client conversations.")
+    
+    st.write("---")
+    st.markdown("### Step 1: Calculate Addressable Spend")
+    st.write("We do not target 100% of turnover. We isolate the 'Make or Move' COGS (Cost of Goods Sold).")
+    st.code(f"Total Turnover (${turnover}B) * Industry Spend Intensity ({spend_pct*100}%) = ${addressable_spend:,.0f}M Addressable Spend")
+    
+    st.write("---")
+    st.markdown("### Step 2: Determine AI Efficiency Gain")
+    st.write("We establish a base savings % based on market volatility, then adjust it based on the whitespace left by their current tech stack.")
+    st.code(f"Base Volatility Gain ({base_gain*100}%) * Tech Maturity Multiplier ({gain_pct/base_gain:.1f}x) = {gain_pct*100:.1f}% Total Efficiency Gain")
+    
+    st.write("---")
+    st.markdown("### Step 3: Projected EBITDA Lift")
+    st.write("Applying the total efficiency gain to the addressable spend to find the bottom-line impact.")
+    st.code(f"Addressable Spend (${addressable_spend:,.0f}M) * Total Efficiency Gain ({gain_pct*100:.1f}%) = ${ebitda_lift:,.1f}M EBITDA Lift")
+    
+    st.write("---")
+    st.markdown("### Step 4: ROI Calculation")
+    st.write("Comparing the EBITDA Lift against the estimated cost of a Kearney Autonomous Sourcing Pilot.")
+    st.code(f"EBITDA Lift (${ebitda_lift:,.1f}M) / Estimated Pilot Cost (${pilot_cost}M) = {roi_multiplier:,.0f}x ROI")
