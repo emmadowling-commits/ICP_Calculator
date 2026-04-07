@@ -13,7 +13,7 @@ st.sidebar.info("This engine uses a standard value-tree to filter top-line turno
 
 # --- HEADER ---
 st.title("Autonomous Sourcing: ICP Engine")
-st.markdown("Evaluate prospect fit and generate a defensible business case for an AS Pilot.")
+st.markdown("Evaluate prospect fit and generate a defensible, ROI-driven business case for an AS Pilot.")
 st.divider()
 
 # --- INPUT SECTION (Global) ---
@@ -53,8 +53,8 @@ else:
 
 # 4. Final Math Calculations
 addressable_spend = (turnover * 1000) * spend_pct
-ebitda_lift = addressable_spend * gain_pct 
-roi_multiplier = ebitda_lift / pilot_cost
+projected_savings = addressable_spend * gain_pct 
+roi_multiplier = projected_savings / pilot_cost
 
 st.divider()
 
@@ -64,44 +64,15 @@ tab1, tab2 = st.tabs(["📊 Executive Business Case", "🧠 Logic & Calculations
 
 # --- TAB 1: The Executive View ---
 with tab1:
-    st.subheader(f"Projected Impact for {name}")
+    st.subheader(f"Projected Return Profile for {name}")
     
     # Display the core metrics
     metric_col1, metric_col2, metric_col3 = st.columns(3)
     metric_col1.metric(label="Addressable Spend", value=f"${addressable_spend:,.0f}M")
-    metric_col2.metric(label="Est. EBITDA Lift", value=f"${ebitda_lift:,.1f}M")
+    metric_col2.metric(label="Projected Savings", value=f"${projected_savings:,.1f}M")
     metric_col3.metric(label="Projected ROI", value=f"{roi_multiplier:,.0f}x")
 
-    # Dynamic Insights
+    # Dynamic Insights focused on ROI
     st.write("")
-    if ebitda_lift >= 40:
-        st.success(f"**🔥 EXACT ICP MATCH (Tier 1):** Moving from {maturity} to Autonomous Sourcing will yield game-changing EBITDA expansion. Recommend pitching an immediate 8-12 week Pilot.")
-    elif ebitda_lift >= 15:
-        st.warning(f"**⚡ STRATEGIC ICP FIT (Tier 2):** Strong value. Addressing their {maturity} processes with an AS pilot will yield a highly defensible return on investment.")
-    else:
-        st.error("**💤 OUTSIDE ICP:** Spend scale or market stability does not currently justify a full AS implementation. Pivot to strategic sourcing advisory.")
-
-# --- TAB 2: The Consultant View (The Math) ---
-with tab2:
-    st.subheader("Value Tree Breakdown")
-    st.markdown("This tab details the exact mathematical logic used to calculate the EBITDA Lift based on the inputs selected above. It acts as a defensible baseline for client conversations.")
-    
-    st.write("---")
-    st.markdown("### Step 1: Calculate Addressable Spend")
-    st.write("We do not target 100% of turnover. We isolate the 'Make or Move' COGS (Cost of Goods Sold).")
-    st.code(f"Total Turnover (${turnover}B) * Industry Spend Intensity ({spend_pct*100}%) = ${addressable_spend:,.0f}M Addressable Spend")
-    
-    st.write("---")
-    st.markdown("### Step 2: Determine AI Efficiency Gain")
-    st.write("We establish a base savings % based on market volatility, then adjust it based on the whitespace left by their current tech stack.")
-    st.code(f"Base Volatility Gain ({base_gain*100}%) * Tech Maturity Multiplier ({gain_pct/base_gain:.1f}x) = {gain_pct*100:.1f}% Total Efficiency Gain")
-    
-    st.write("---")
-    st.markdown("### Step 3: Projected EBITDA Lift")
-    st.write("Applying the total efficiency gain to the addressable spend to find the bottom-line impact.")
-    st.code(f"Addressable Spend (${addressable_spend:,.0f}M) * Total Efficiency Gain ({gain_pct*100:.1f}%) = ${ebitda_lift:,.1f}M EBITDA Lift")
-    
-    st.write("---")
-    st.markdown("### Step 4: ROI Calculation")
-    st.write("Comparing the EBITDA Lift against the estimated cost of a Kearney Autonomous Sourcing Pilot.")
-    st.code(f"EBITDA Lift (${ebitda_lift:,.1f}M) / Estimated Pilot Cost (${pilot_cost}M) = {roi_multiplier:,.0f}x ROI")
+    if roi_multiplier >= 80:
+        st.
